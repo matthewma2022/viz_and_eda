@@ -1,0 +1,169 @@
+---
+title: "Viz_part_01"
+author: "Matthew Ma"
+output: github_document
+---
+
+## Lets import data
+
+```{r}
+library(tidyverse)
+library(ggridges)
+```
+
+This code from the the visualization module
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+
+## Lets make a scatterplot
+
+```{r}
+
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point()
+
+```
+
+
+## Lets make the same scatterplot, but different.
+
+```{r}
+
+weather_df %>% 
+  drop_na() %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_point()
+
+```
+
+## Lets keep making the same plot, but different.
+
+```{r}
+
+weather_scatterplot =
+  weather_df %>% 
+  drop_na() %>% 
+  ggplot(aes(x = tmin, y = tmax)) 
+
+weather_scatterplot +
+  geom_point()
+
+```
+
+
+## lets fancy this up
+
+```{r}
+
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = 0.3) + 
+  geom_smooth(se = FALSE) +
+  facet_grid(. ~ name)
+
+```
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_point(aes(color = name)) + 
+  geom_smooth()
+
+```
+
+
+## Lets split up 'tmin' and 'tmax'
+
+```{r}
+
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_point(aes(size = prcp), alpha = 0.3) + 
+  geom_smooth(se = FALSE) +
+  facet_grid(. ~ name) + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+```
+
+## Some quick stuff
+
+```{r}
+
+weather_df %>% 
+  ggplot(aes( x = tmax, y = tmin)) +
+  geom_hex()
+```
+
+## Univariate plots
+
+Histograms, barplots, boxplots, violins, etc..
+
+```{r}
+
+weather_df %>% 
+  ggplot(aes( x = tmax, fill = name)) +
+  geom_histogram() +
+  facet_grid(. ~ name)
+
+```
+
+
+## Lets see more options
+
+```{r}
+
+weather_df %>% 
+  ggplot(aes( x = tmax, fill = name)) +
+  geom_density(alpha = .3)
+
+```
+
+## Lets do boxplot
+
+```{r}
+
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax, fill = name)) +
+  geom_boxplot() +
+  facet_grid(. ~ name)
+
+```
+
+
+## Violin?
+
+```{r}
+
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax, fill = name)) +
+  geom_violin()
+
+```
+
+OR ridgeplots
+
+```{r}
+
+weather_df %>% 
+  ggplot(aes(x = tmax, y = name)) +
+  geom_density_ridges()
+
+```
+
